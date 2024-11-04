@@ -167,16 +167,6 @@ function local_custompage_extend_navigation(global_navigation $nav) {
 }
 
 /**
- * local_custompage_before_standard_top_of_body_html
- */
-function local_custompage_before_standard_top_of_body_html() {
-    global $CFG;
-    if (isset($CFG->dbunmodifiedcustommenuitems)) {
-        $CFG->custommenuitems = $CFG->dbunmodifiedcustommenuitems;
-        unset($CFG->dbunmodifiedcustommenuitems);
-    }
-}
-/**
  * after_config hook
  * @return void
  */
