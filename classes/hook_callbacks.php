@@ -43,6 +43,7 @@ class hook_callbacks {
 
     public static function after_config(after_config $hook): void {
       global $CFG;
+      require_once($CFG->dirroot . '/local/custompage/lib.php');
 
       $customcontextclasses = [
         CONTEXT_CUSTOMPAGE => 'local_custompage\\custom_context\\context_custompage',
