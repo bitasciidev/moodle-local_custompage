@@ -20,6 +20,8 @@ namespace local_custompage;
 
 use context;
 use context_system;
+use core\exception\coding_exception;
+use dml_exception;
 use local_custompage\local\helpers\audience;
 use local_custompage\local\models\page;
 
@@ -44,13 +46,14 @@ class permission {
         }
     }
 
-    /**
-     * Whether given user can view pages list
-     *
-     * @param int|null $userid User ID to check, or the current user if omitted
-     * @param context|null $context
-     * @return bool
-     */
+  /**
+   * Whether given user can view pages list
+   *
+   * @param int|null $userid User ID to check, or the current user if omitted
+   * @param context|null $context
+   * @return bool
+   * @throws dml_exception
+   */
     public static function can_view_pages_list(?int $userid = null, ?context $context = null): bool {
         global $CFG;
 
@@ -78,13 +81,16 @@ class permission {
         }
     }
 
-    /**
-     * Whether given user can view page
-     *
-     * @param page $page
-     * @param int|null $userid User ID to check, or the current user if omitted
-     * @return bool
-     */
+  /**
+   * Whether given user can view page
+   *
+   * @param page $page
+   * @param int|null $userid User ID to check, or the current user if omitted
+   * @return bool
+   * @throws \coding_exception
+   * @throws coding_exception
+   * @throws dml_exception
+   */
     public static function can_view_page(page $page, ?int $userid = null): bool {
         if (static::can_view_pages_list($userid, $page->get_context())) {
             return true;
@@ -115,13 +121,14 @@ class permission {
         }
     }
 
-    /**
-     * Whether given user can edit page
-     *
-     * @param page $page
-     * @param int|null $userid User ID to check, or the current user if omitted
-     * @return bool
-     */
+  /**
+   * Whether given user can edit page
+   *
+   * @param page $page
+   * @param int|null $userid User ID to check, or the current user if omitted
+   * @return bool
+   * @throws \coding_exception
+   */
     public static function can_edit_page(page $page, ?int $userid = null): bool {
         global $CFG, $USER;
 

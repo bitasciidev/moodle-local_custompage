@@ -18,27 +18,22 @@ declare(strict_types=1);
 
 namespace local_custompage\reportbuilder\local\systemreports;
 
-use context;
-use context_system;
+
+use core_reportbuilder\local\entities\user;
 use core_reportbuilder\local\helpers\format;
-use core_reportbuilder\local\models\report;
-use core_reportbuilder\output\report_name_editable;
+use core_reportbuilder\local\report\action;
+use core_reportbuilder\local\report\column;
+use core_reportbuilder\system_report;
+use lang_string;
+use local_custompage\local\helpers\audience;
 use local_custompage\local\models\page;
 use local_custompage\output\page_name_editable;
 use local_custompage\output\page_title_editable;
+use local_custompage\permission;
 use local_custompage\reportbuilder\local\entities\custompages;
-use core_reportbuilder\local\helpers\database;
-use core_reportbuilder\local\entities\user;
-use core_reportbuilder\local\report\action;
-use core_reportbuilder\local\report\column;
-use html_writer;
-use lang_string;
 use moodle_url;
 use pix_icon;
-use core_reportbuilder\system_report;
 use stdClass;
-use local_custompage\local\helpers\audience;
-use local_custompage\permission;
 
 /**
  * Pages list

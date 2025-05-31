@@ -18,12 +18,13 @@ declare(strict_types=1);
 
 namespace local_custompage\local\models;
 
+use coding_exception;
 use context;
+use core\persistent;
+use lang_string;
 use local_custompage\event\audience_created;
 use local_custompage\event\audience_deleted;
 use local_custompage\event\audience_updated;
-use lang_string;
-use core\persistent;
 use local_custompage\local\helpers\audience as helper;
 
 /**
@@ -92,11 +93,12 @@ class audience extends persistent {
         helper::purge_caches();
     }
 
-    /**
-     * Hook to execute after update
-     *
-     * @param bool $result
-     */
+  /**
+   * Hook to execute after update
+   *
+   * @param bool $result
+   * @throws coding_exception
+   */
     protected function after_update($result): void {
         if ($result) {
             audience_updated::create_from_object($this)->trigger();
@@ -104,11 +106,12 @@ class audience extends persistent {
         }
     }
 
-    /**
-     * Hook to execute after deletion
-     *
-     * @param bool $result
-     */
+  /**
+   * Hook to execute after deletion
+   *
+   * @param bool $result
+   * @throws coding_exception
+   */
     protected function after_delete($result): void {
         if ($result) {
             audience_deleted::create_from_object($this)->trigger();
@@ -116,21 +119,23 @@ class audience extends persistent {
         }
     }
 
-    /**
-     * Return the page this audience belongs to
-     *
-     * @return page
-     */
+  /**
+   * Return the page this audience belongs to
+   *
+   * @return page
+   * @throws coding_exception
+   */
     public function get_page(): page {
         return new page($this->get('pageid'));
     }
 
-    /**
-     * Return formatted audience heading
-     *
-     * @param context|null $context If the context of the page is already known, it should be passed here
-     * @return string
-     */
+  /**
+   * Return formatted audience heading
+   *
+   * @param context|null $context If the context of the page is already known, it should be passed here
+   * @return string
+   * @throws coding_exception
+   */
     public function get_formatted_heading(?context $context = null): string {
         if ($context === null) {
             $context = $this->get_page()->get_context();

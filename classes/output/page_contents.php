@@ -27,7 +27,6 @@ namespace local_custompage\output;
 use local_custompage\local\models\page;
 use renderable;
 use renderer_base;
-use stdClass;
 use templatable;
 
 /**

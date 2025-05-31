@@ -26,23 +26,23 @@ declare(strict_types=1);
 
 define('CONTEXT_CUSTOMPAGE', 75);
 
+use core\exception\moodle_exception;
 use core\output\inplace_editable;
 use local_custompage\form\audience;
 use local_custompage\local\models\page as page_persistent;
-use local_custompage\manager;
 use local_custompage\output\audience_heading_editable;
 use local_custompage\output\page_name_editable;
 use local_custompage\output\page_title_editable;
-use local_custompage\permission;
 use local_custompage\local\helpers\audience as audience_helper;
 
 /**
- * Plugin inplace editable implementation
+ * Update the editable item and return its updated state.
  *
- * @param string $itemtype
- * @param int $itemid
- * @param string $newvalue
- * @return inplace_editable|null
+ * @param string $itemtype The type of the item being edited (e.g., 'pagename', 'pagetitle', 'audienceheading').
+ * @param int $itemid The ID of the item being edited.
+ * @param string $newvalue The new value to assign to the editable item.
+ * @return inplace_editable|null The updated inplace_editable instance, or null if the itemtype is not recognized.
+ * @throws moodle_exception
  */
 function local_custompage_inplace_editable(string $itemtype, int $itemid, string $newvalue): ?inplace_editable {
     require_sesskey();
@@ -57,12 +57,12 @@ function local_custompage_inplace_editable(string $itemtype, int $itemid, string
     return null;
 }
 
-
 /**
  * Return the audience form fragment
  *
  * @param array $params
  * @return string
+ * @throws moodle_exception
  */
 function local_custompage_output_fragment_audience_form(array $params): string {
     global $PAGE;
@@ -87,19 +87,19 @@ function local_custompage_output_fragment_audience_form(array $params): string {
     return $renderer->render_from_template('local_custompage/local/audience/form', $context);
 }
 
-
 /**
- * local_custompage_extend_navigation
+ * Extend the global navigation with custom pages for the current user.
  *
- * @param global_navigation $nav
+ * @param global_navigation $nav The global navigation instance.
+ * @return void
  * @throws coding_exception
  * @throws moodle_exception
  */
 function local_custompage_extend_navigation(global_navigation $nav) {
     global $PAGE, $CFG, $USER;
 
-    // First we need to find the pages based on user id.
-    // If guest-login is enabled then we will also check for guest user otherwise only for logged-in user.
+    // First, we need to find the pages based on user id.
+    // If guest-login is enabled, then we will also check for guest user otherwise only for logged-in user.
 
     $CFG->dbunmodifiedcustommenuitems = $CFG->custommenuitems;
 
@@ -167,7 +167,8 @@ function local_custompage_extend_navigation(global_navigation $nav) {
 }
 
 /**
- * after_config hook
+ * Configure custom context classes for the local_custompage plugin using after_config hook.
+ *
  * @return void
  */
 function local_custompage_after_config() {

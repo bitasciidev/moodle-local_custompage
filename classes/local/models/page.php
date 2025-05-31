@@ -18,10 +18,12 @@ declare(strict_types=1);
 
 namespace local_custompage\local\models;
 
+use coding_exception;
 use context;
 use context_helper;
 use context_system;
 use core\persistent;
+use dml_exception;
 use local_custompage\event\custompage_created;
 use local_custompage\event\custompage_deleted;
 use local_custompage\event\custompage_updated;
@@ -96,38 +98,43 @@ class page extends persistent {
         context_helper::delete_instance(CONTEXT_CUSTOMPAGE, $this->get('id'));
     }
 
-    /**
-     * Throw page deleted event when persistent is deleted
-     *
-     * @param bool $result
-     */
+  /**
+   * Throw page deleted event when persistent is deleted
+   *
+   * @param bool $result
+   * @throws coding_exception
+   * @throws dml_exception
+   */
     protected function after_delete($result): void {
         custompage_deleted::create_from_object($this)->trigger();
     }
 
-    /**
-     * Throw page updated event when persistent is updated
-     *
-     * @param bool $result
-     */
+  /**
+   * Throw page updated event when persistent is updated
+   *
+   * @param bool $result
+   * @throws coding_exception
+   */
     protected function after_update($result): void {
         custompage_updated::create_from_object($this)->trigger();
     }
 
-    /**
-     * Return page context, used by exporters
-     *
-     * @return context
-     */
+  /**
+   * Return page context, used by exporters
+   *
+   * @return context
+   * @throws coding_exception
+   */
     public function get_context(): context {
         return context::instance_by_id($this->raw_get('contextid'));
     }
 
-    /**
-     * Return formatted page name
-     *
-     * @return string
-     */
+  /**
+   * Return formatted page name
+   *
+   * @return string
+   * @throws coding_exception
+   */
     public function get_formatted_name(): string {
         return format_string($this->raw_get('name'), true, ['context' => $this->get_context(), 'escape' => true]);
     }
@@ -135,7 +142,7 @@ class page extends persistent {
     /**
      * Return formatted page title
      * @return string
-     * @throws \coding_exception
+     * @throws coding_exception
      */
     public function get_formatted_title(): string {
         return format_string($this->raw_get('title'), true, ['context' => $this->get_context(), 'escape' => true]);

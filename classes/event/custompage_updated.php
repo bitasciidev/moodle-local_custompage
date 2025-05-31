@@ -20,6 +20,7 @@ namespace local_custompage\event;
 
 use coding_exception;
 use core\event\base;
+use core\exception\moodle_exception;
 use local_custompage\local\models\page;
 use moodle_url;
 
@@ -47,12 +48,13 @@ class custompage_updated extends base {
         $this->data['edulevel'] = self::LEVEL_OTHER;
     }
 
-    /**
-     * Creates an instance from a custompage object
-     *
-     * @param page $page
-     * @return self
-     */
+  /**
+   * Creates an instance from a custompage object
+   *
+   * @param page $page
+   * @return self
+   * @throws coding_exception
+   */
     public static function create_from_object(page $page): self {
         $eventparams = [
             'context'  => $page->get_context(),
@@ -67,11 +69,12 @@ class custompage_updated extends base {
         return $event;
     }
 
-    /**
-     * Returns localised general event name.
-     *
-     * @return string
-     */
+  /**
+   * Returns localised general event name.
+   *
+   * @return string
+   * @throws coding_exception
+   */
     public static function get_name() {
         return get_string('pageupdated', 'local_custompage');
     }
@@ -97,11 +100,12 @@ class custompage_updated extends base {
         }
     }
 
-    /**
-     * Returns relevant URL.
-     *
-     * @return moodle_url
-     */
+  /**
+   * Returns relevant URL.
+   *
+   * @return moodle_url
+   * @throws moodle_exception
+   */
     public function get_url(): moodle_url {
         return new moodle_url('/local/custompage/edit.php', ['id' => $this->objectid]);
     }

@@ -23,20 +23,23 @@
  */
 declare(strict_types=1);
 namespace local_custompage\output;
+use coding_exception;
+use core\exception\moodle_exception;
 use html_writer;
+use local_custompage\local\models\page;
 use moodle_url;
 use plugin_renderer_base;
-use local_custompage\local\models\page;
 
 /**
  * renderer for local_custompage
  */
 class renderer extends plugin_renderer_base {
-    /**
-     * Renders the New page button
-     *
-     * @return string
-     */
+  /**
+   * Renders the New page button
+   *
+   * @return string
+   * @throws coding_exception
+   */
     public function render_new_page_button(): string {
         return html_writer::tag('button', get_string('newpage', 'local_custompage'), [
         'class' => 'btn btn-primary my-auto',
@@ -44,12 +47,14 @@ class renderer extends plugin_renderer_base {
         ]);
     }
 
-    /**
-     * Renders full page editor header
-     *
-     * @param page $page
-     * @return string
-     */
+  /**
+   * Renders full page editor header
+   *
+   * @param page $page
+   * @return string
+   * @throws moodle_exception
+   * @throws coding_exception
+   */
     public function render_fullpage_editor_header(page $page): string {
         $pagename = $page->get_formatted_name();
 

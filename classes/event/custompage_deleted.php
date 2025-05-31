@@ -21,6 +21,7 @@ namespace local_custompage\event;
 use coding_exception;
 use context_system;
 use core\event\base;
+use dml_exception;
 use Exception;
 use local_custompage\local\models\page;
 
@@ -48,12 +49,14 @@ class custompage_deleted extends base {
         $this->data['edulevel'] = self::LEVEL_OTHER;
     }
 
-    /**
-     * Creates an instance from a page object
-     *
-     * @param page $page
-     * @return self
-     */
+  /**
+   * Creates an instance from a page object
+   *
+   * @param page $page
+   * @return self
+   * @throws dml_exception
+   * @throws coding_exception
+   */
     public static function create_from_object(page $page): self {
 
         try {
@@ -75,11 +78,12 @@ class custompage_deleted extends base {
         return $event;
     }
 
-    /**
-     * Returns localised general event name.
-     *
-     * @return string
-     */
+  /**
+   * Returns localised general event name.
+   *
+   * @return string
+   * @throws coding_exception
+   */
     public static function get_name() {
         return get_string('pagedeleted', 'local_custompage');
     }

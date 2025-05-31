@@ -19,15 +19,19 @@ declare(strict_types=1);
 namespace local_custompage\reportbuilder\local\systemreports;
 
 use core_reportbuilder\local\entities\user;
+use core_reportbuilder\system_report;
+use core_user\fields;
 use local_custompage\local\helpers\audience as audience_helper;
 use local_custompage\local\models\audience;
 use local_custompage\local\models\page;
 use local_custompage\permission;
-use core_reportbuilder\system_report;
-use core_user\fields;
 
 /**
- * Page access list
+ * Provides functionality for generating a report of users with access to a specific page.
+ *
+ * This class extends the `system_report` class and is designed to retrieve and display
+ * a list of users allowed to access a specific page. It incorporates filters and sorting
+ * to handle user-related data efficiently, including support for identity fields.
  *
  * @package     local_custompage
  * @copyright   2024 BitAscii Solutions <bitascii.dev@gmail.com>

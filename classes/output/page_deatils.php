@@ -24,6 +24,7 @@
 
 namespace local_custompage\output;
 
+use coding_exception;
 use local_custompage\local\models\page;
 use renderable;
 use renderer_base;
@@ -51,8 +52,7 @@ class page_deatils implements renderable, templatable {
      *
      * @param renderer_base $output
      * @return stdClass
-     * @throws \coding_exception
-     * @throws \dml_exception
+     * @throws coding_exception
      */
     public function export_for_template(renderer_base $output) {
         $data = new stdClass();

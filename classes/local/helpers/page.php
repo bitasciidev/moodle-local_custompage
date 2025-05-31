@@ -18,13 +18,13 @@ declare(strict_types=1);
 
 namespace local_custompage\local\helpers;
 
+use coding_exception;
 use core\invalid_persistent_exception;
-use stdClass;
 use invalid_parameter_exception;
-use core\persistent;
-use local_custompage\manager;
-use local_custompage\local\models\page as page_model;
 use local_custompage\custom_context\context_custompage;
+use local_custompage\local\models\page as page_model;
+use local_custompage\manager;
+use stdClass;
 
 /**
  * Helper class for manipulating custom pages
@@ -39,7 +39,7 @@ class page {
      *
      * @param stdClass $data
      * @return page_model
-     * @throws \coding_exception
+     * @throws coding_exception
      * @throws invalid_persistent_exception
      */
     public static function create_page(stdClass $data): page_model {
@@ -55,12 +55,15 @@ class page {
         return $newpersistent;
     }
 
-    /**
-     * Update custom page
-     *
-     * @param stdClass $data
-     * @return page_model
-     */
+  /**
+   * Update custom page
+   *
+   * @param stdClass $data
+   * @return page_model
+   * @throws coding_exception
+   * @throws invalid_parameter_exception
+   * @throws invalid_persistent_exception
+   */
     public static function update_page(stdClass $data): page_model {
         $page = page_model::get_record(['id' => $data->id]);
         if ($page === false) {

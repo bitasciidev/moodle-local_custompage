@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- *  services.php description here.
+ *  Services definitions for local_custompage.
  *
  * @package     local_custompage
  * @copyright   2024 BitAscii Solutions <bitascii.dev@gmail.com>

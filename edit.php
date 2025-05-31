@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- *  edit.php description here.
+ * Edit page for managing custom pages, including content, details, audience and access settings.
  *
  * @package     local_custompage
  * @copyright   2024 BitAscii Solutions <bitascii.dev@gmail.com>

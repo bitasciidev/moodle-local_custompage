@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 namespace local_custompage\output\dynamictabs;
 
+use coding_exception;
 use core\output\dynamic_tabs\base;
 use local_custompage\external\custom_page_audience_cards_exporter;
 use local_custompage\local\helpers\audience as audience_helper;
@@ -34,12 +35,13 @@ use renderer_base;
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class audience extends base {
-    /**
-     * Export this for use in a mustache template context.
-     *
-     * @param renderer_base $output
-     * @return array
-     */
+  /**
+   * Export this for use in a mustache template context.
+   *
+   * @param renderer_base $output
+   * @return array
+   * @throws coding_exception
+   */
     public function export_for_template(renderer_base $output): array {
         // Get all the audiences types to populate the left menu.
         $menucardsexporter = new custom_page_audience_cards_exporter(null);
@@ -60,11 +62,12 @@ class audience extends base {
         return $data;
     }
 
-    /**
-     * The label to be displayed on the tab
-     *
-     * @return string
-     */
+  /**
+   * The label to be displayed on the tab
+   *
+   * @return string
+   * @throws coding_exception
+   */
     public function get_tab_label(): string {
         return get_string('audience', 'core_reportbuilder');
     }
@@ -88,11 +91,12 @@ class audience extends base {
         return 'local_custompage/local/dynamictabs/audience';
     }
 
-    /**
-     * Get all current audiences instances for this page.
-     *
-     * @return array
-     */
+  /**
+   * Get all current audiences instances for this page.
+   *
+   * @return array
+   * @throws coding_exception
+   */
     private function get_all_page_audiences(): array {
         global $PAGE;
 

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- *  page.php description here.
+ * This file defines the page class which handles the custom page logic.
  *
  * @package     local_custompage
  * @copyright   2024 BitAscii Solutions <bitascii.dev@gmail.com>
@@ -24,12 +24,12 @@
 
 namespace local_custompage\local\custompage;
 
+use coding_exception;
+use invalid_parameter_exception;
+use local_custompage\local\helpers\page as page_helper;
 use local_custompage\local\models\page as page_persistent;
 use local_custompage\output\page_contents;
 use local_custompage\output\page_deatils;
-use local_custompage\local\helpers\page as page_helper;
-use renderer_base;
-use stdClass;
 
 /**
  * custompage class to representing a page
@@ -37,11 +37,12 @@ use stdClass;
 class page {
     /** @var page $page_persistent Page persistent */
     private $page_persistent;
-    /**
-     * Returns persistent class used when initialising this page
-     *
-     * @return page
-     */
+
+  /**
+   * Returns persistent class used when initialising this page
+   *
+   * @param page_persistent $page
+   */
     public function __construct(page_persistent $page) {
         $this->page_persistent = $page;
     }
@@ -56,7 +57,7 @@ class page {
 
     /**
      * page details output
-     * @return bool|string
+     * @return string
      */
     public function details_output() {
         global $PAGE;
@@ -71,7 +72,7 @@ class page {
     /**
      * page content output
      * @return bool|string
-     * @throws \coding_exception
+     * @throws coding_exception
      */
     public function content_output() {
         global $PAGE;
@@ -83,8 +84,8 @@ class page {
     /**
      * delete a page
      * @return bool
-     * @throws \coding_exception
-     * @throws \invalid_parameter_exception
+     * @throws coding_exception
+     * @throws invalid_parameter_exception
      */
     public function delete() {
         // We need to delete the audiences of this page.

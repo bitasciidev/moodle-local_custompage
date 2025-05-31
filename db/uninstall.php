@@ -17,7 +17,7 @@
 use local_custompage\local\models\page;
 
 /**
- *  uninstall.php description here.
+ *  uninstall.php contains the uninstallation procedures for local_custompage.
  *
  * @package     local_custompage
  * @copyright   2024 BitAscii Solutions <bitascii.dev@gmail.com>

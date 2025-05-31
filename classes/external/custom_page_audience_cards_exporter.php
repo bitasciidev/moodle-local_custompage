@@ -18,12 +18,13 @@ declare(strict_types=1);
 
 namespace local_custompage\external;
 
+use coding_exception;
 use core_collator;
 use core_component;
 use core_plugin_manager;
 use core_reportbuilder\external\custom_report_menu_cards_exporter;
-use renderer_base;
 use local_custompage\local\audiences\base;
+use renderer_base;
 
 /**
  * Custom page audience cards exporter class
@@ -33,12 +34,13 @@ use local_custompage\local\audiences\base;
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class custom_page_audience_cards_exporter extends custom_report_menu_cards_exporter {
-    /**
-     * Get the additional values to inject while exporting
-     *
-     * @param renderer_base $output
-     * @return array
-     */
+  /**
+   * Get the additional values to inject while exporting
+   *
+   * @param renderer_base $output
+   * @return array
+   * @throws coding_exception
+   */
     protected function get_other_values(renderer_base $output): array {
         $menucards = [];
 

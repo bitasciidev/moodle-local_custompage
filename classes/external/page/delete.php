@@ -18,11 +18,15 @@ declare(strict_types=1);
 
 namespace local_custompage\external\page;
 
+use coding_exception;
+use core_external\restricted_context_exception;
 use external_api;
 use external_function_parameters;
 use external_value;
+use invalid_parameter_exception;
 use local_custompage\factories\page_factory;
 use local_custompage\manager;
+use local_custompage\page_access_exception;
 use local_custompage\permission;
 
 defined('MOODLE_INTERNAL') || die();
@@ -38,12 +42,16 @@ require_once("{$CFG->libdir}/externallib.php");
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class delete extends external_api {
-    /**
-     * External function to delete a page.
-     *
-     * @param int $pageid
-     * @return bool
-     */
+  /**
+   * External function to delete a page.
+   *
+   * @param int $pageid
+   * @return bool
+   * @throws coding_exception
+   * @throws restricted_context_exception
+   * @throws invalid_parameter_exception
+   * @throws page_access_exception
+   */
     public static function execute(int $pageid): bool {
         [
         'pageid' => $pageid

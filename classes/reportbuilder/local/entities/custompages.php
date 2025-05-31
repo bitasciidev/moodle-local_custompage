@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- *  custompages.php description here.
+ * Class containing the definition of custompages entity
  *
  * @package     local_custompage
  * @copyright   2024 BitAscii Solutions <bitascii.dev@gmail.com>
@@ -24,6 +24,7 @@
 
 namespace local_custompage\reportbuilder\local\entities;
 
+use core\exception\coding_exception;
 use core_collator;
 use core_reportbuilder\local\entities\base;
 use core_reportbuilder\local\filters\autocomplete;
@@ -31,6 +32,7 @@ use core_reportbuilder\local\filters\text;
 use core_reportbuilder\local\report\column;
 use core_reportbuilder\local\report\filter;
 use lang_string;
+use moodle_exception;
 
 /**
  * custompage entity
@@ -41,7 +43,15 @@ class custompages extends base {
      * @return string[]
      */
     protected function get_default_table_aliases(): array {
-        return ['local_custompages' => 'cp'];
+        return [
+          'local_custompages' => 'cp'
+        ];
+    }
+
+    protected function get_default_tables(): array {
+      return [
+        'local_custompages'
+      ];
     }
     /**
      * entity title getter
@@ -71,11 +81,12 @@ class custompages extends base {
         return $this;
     }
 
-    /**
-     * Returns list of all available columns
-     *
-     * @return column[]
-     */
+  /**
+   * Returns list of all available columns
+   *
+   * @return column[]
+   * @throws coding_exception
+   */
     protected function get_all_columns(): array {
         global $DB;
 
@@ -128,11 +139,12 @@ class custompages extends base {
         return $columns;
     }
 
-    /**
-     * Return list of all available filters
-     *
-     * @return filter[]
-     */
+  /**
+   * Return list of all available filters
+   *
+   * @return filter[]
+   * @throws moodle_exception
+   */
     protected function get_all_filters(): array {
         global $DB;
 
@@ -149,7 +161,7 @@ class custompages extends base {
         ->add_joins($this->get_joins())
         ->set_options_callback(static function (): array {
             global $DB;
-            $pagenames = $DB->get_records_sql('SELECT DISTINCT id,name FROM {local_custompages} ORDER BY name ASC');
+            $pagenames = $DB->get_records_sql('SELECT DISTINCT id,name FROM {local_custompages} ORDER BY name');
 
             $options = [];
             foreach ($pagenames as $pagename) {

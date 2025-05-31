@@ -16,11 +16,8 @@
 
 namespace local_custompage;
 
+use core\hook\after_config;
 use core\hook\output\before_standard_top_of_body_html_generation;
-use dml_read_exception;
-use Exception;
-use html_writer;
-use moodle_url;
 
 /**
  * Allows the plugin to perform action based on hook callback.
@@ -42,5 +39,19 @@ class hook_callbacks {
           $CFG->custommenuitems = $CFG->dbunmodifiedcustommenuitems;
           unset($CFG->dbunmodifiedcustommenuitems);
         }
+    }
+
+    public static function after_config(after_config $hook): void {
+      global $CFG;
+
+      $customcontextclasses = [
+        CONTEXT_CUSTOMPAGE => 'local_custompage\\custom_context\\context_custompage',
+      ];
+
+      if (isset($CFG->custom_context_classes)) {
+        $CFG->custom_context_classes = $CFG->custom_context_classes + $customcontextclasses;
+      } else {
+        $CFG->custom_context_classes = $customcontextclasses;
+      }
     }
 }

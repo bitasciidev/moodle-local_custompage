@@ -18,13 +18,15 @@ declare(strict_types=1);
 
 namespace local_custompage\output\dynamictabs;
 
+use coding_exception;
 use context_system;
 use core\output\dynamic_tabs\base;
-use local_custompage\local\models\page;
-use local_custompage\reportbuilder\local\systemreports\page_access_list;
-use local_custompage\permission;
+use core_reportbuilder\exception\source_invalid_exception;
 use core_reportbuilder\system_report_factory;
-use local_custompage\custom_context\context_custompage;
+use dml_exception;
+use local_custompage\local\models\page;
+use local_custompage\permission;
+use local_custompage\reportbuilder\local\systemreports\page_access_list;
 use renderer_base;
 
 /**
@@ -35,12 +37,14 @@ use renderer_base;
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class access extends base {
-    /**
-     * Export this for use in a mustache template context.
-     *
-     * @param renderer_base $output
-     * @return array
-     */
+  /**
+   * Export this for use in a mustache template context.
+   *
+   * @param renderer_base $output
+   * @return array
+   * @throws source_invalid_exception
+   * @throws dml_exception
+   */
     public function export_for_template(renderer_base $output): array {
         $report = system_report_factory::create(
             page_access_list::class,
@@ -54,11 +58,12 @@ class access extends base {
         return $data;
     }
 
-    /**
-     * The label to be displayed on the tab
-     *
-     * @return string
-     */
+  /**
+   * The label to be displayed on the tab
+   *
+   * @return string
+   * @throws coding_exception
+   */
     public function get_tab_label(): string {
         return get_string('access', 'core_reportbuilder');
     }

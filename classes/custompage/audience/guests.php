@@ -18,7 +18,9 @@ declare(strict_types=1);
 
 namespace local_custompage\custompage\audience;
 
+use coding_exception;
 use core_reportbuilder\local\helpers\database;
+use dml_exception;
 use local_custompage\local\audiences\base;
 use MoodleQuickForm;
 
@@ -30,21 +32,24 @@ use MoodleQuickForm;
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class guests extends base {
-    /**
-     * Add audience elements to the current form
-     *
-     * @param MoodleQuickForm $mform
-     */
+  /**
+   * Add audience elements to the current form
+   *
+   * @param MoodleQuickForm $mform
+   * @throws coding_exception
+   */
     public function get_config_form(MoodleQuickForm $mform): void {
         $mform->addElement('static', 'guest', get_string('guest', 'moodle'));
     }
 
-    /**
-     * Return SQL to retrieve users that match this audience
-     *
-     * @param string $usertablealias
-     * @return array [$join, $select, $params]
-     */
+  /**
+   * Return SQL to retrieve users that match this audience
+   *
+   * @param string $usertablealias
+   * @return array [$join, $select, $params]
+   * @throws dml_exception
+   * @throws coding_exception
+   */
     public function get_sql(string $usertablealias): array {
         global $CFG, $DB;
 
@@ -54,11 +59,12 @@ class guests extends base {
         return ['', "{$usertablealias}.id {$select}", $params];
     }
 
-    /**
-     * Return name of this audience
-     *
-     * @return string
-     */
+  /**
+   * Return name of this audience
+   *
+   * @return string
+   * @throws coding_exception
+   */
     public function get_name(): string {
         return get_string('nonauthenticatedusers', 'local_custompage');
     }

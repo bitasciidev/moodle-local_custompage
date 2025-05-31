@@ -18,6 +18,8 @@ declare(strict_types=1);
 
 namespace local_custompage;
 
+use coding_exception;
+use core\invalid_persistent_exception;
 use local_custompage\local\models\page;
 use stdClass;
 
@@ -39,12 +41,14 @@ class manager {
         return new page($pageid);
     }
 
-    /**
-     * Create new page persistent
-     *
-     * @param stdClass $pagedata
-     * @return page
-     */
+  /**
+   * Create new page persistent
+   *
+   * @param stdClass $pagedata
+   * @return page
+   * @throws coding_exception
+   * @throws invalid_persistent_exception
+   */
     public static function create_page_persistent(stdClass $pagedata): page {
         return (new page(0, $pagedata))->create();
     }

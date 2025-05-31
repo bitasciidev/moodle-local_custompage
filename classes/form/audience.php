@@ -19,6 +19,7 @@ declare(strict_types=1);
 namespace local_custompage\form;
 
 use context;
+use core\exception\moodle_exception;
 use core_form\dynamic_form;
 use local_custompage\local\audiences\base;
 use local_custompage\output\audience_heading_editable;
@@ -35,7 +36,9 @@ use stdClass;
  */
 class audience extends dynamic_form {
     /**
-     * Audience we work with
+     * The audience we are working with. The instance is created based on the current
+     * page and the "id" parameter in the URL. If the "id" parameter is not provided,
+     * a new instance is created.
      *
      * @return base
      */
@@ -166,11 +169,12 @@ class audience extends dynamic_form {
         $this->set_data($formdata);
     }
 
-    /**
-     * Page url
-     *
-     * @return moodle_url
-     */
+  /**
+   * Page url
+   *
+   * @return moodle_url
+   * @throws moodle_exception
+   */
     protected function get_page_url_for_dynamic_submission(): moodle_url {
         return new moodle_url('/local/custompage/edit.php', ['id' => $this->optional_param('pageid', 0, PARAM_INT)]);
     }

@@ -23,6 +23,7 @@
  */
 declare(strict_types=1);
 
+use local_custompage\output\renderer;
 use local_custompage\permission;
 use core_reportbuilder\system_report_factory;
 use local_custompage\reportbuilder\local\systemreports\pages_list;
@@ -50,7 +51,7 @@ echo html_writer::start_div('d-flex justify-content-between mb-2');
 echo $OUTPUT->heading(get_string('custompages', 'local_custompage'));
 
 if (permission::can_create_page()) {
-    /** @var \local_custompage\output\renderer $renderer */
+    /** @var renderer $renderer */
     $renderer = $PAGE->get_renderer('local_custompage');
     echo $renderer->render_new_page_button();
 }

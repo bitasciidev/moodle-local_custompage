@@ -19,12 +19,14 @@ declare(strict_types=1);
 namespace local_custompage\local\helpers;
 
 use cache;
+use coding_exception;
 use context;
 use context_system;
 use core_collator;
 use core_component;
 use core_plugin_manager;
 use core_reportbuilder\local\helpers\database;
+use dml_exception;
 use local_custompage\local\audiences\base;
 use local_custompage\local\models\audience as audience_model;
 
@@ -36,12 +38,13 @@ use local_custompage\local\models\audience as audience_model;
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class audience {
-    /**
-     * Return audience instances for a given page. Note that any records pointing to invalid audience types will be excluded
-     *
-     * @param int $pageid
-     * @return base[]
-     */
+  /**
+   * Return audience instances for a given page. Note that any records pointing to invalid audience types will be excluded
+   *
+   * @param int $pageid
+   * @return base[]
+   * @throws coding_exception
+   */
     public static function get_base_records(int $pageid): array {
         $records = audience_model::get_records(['pageid' => $pageid], 'id');
 
@@ -53,13 +56,16 @@ class audience {
         return array_filter($instances);
     }
 
-    /**
-     * Returns list of custompages IDs that the specified user can access, based on audience configuration. This can be expensive if the
-     * site has lots of pages, with lots of audiences, so we cache the result for the duration of the users session
-     *
-     * @param int|null $userid User ID to check, or the current user if omitted
-     * @return int[]
-     */
+  /**
+   * Returns list of custompages IDs that the specified user can access, based on audience configuration. This can be expensive if the
+   * site has lots of pages, with lots of audiences, so we cache the result for the duration of the users session
+   *
+   * @param int|null $userid User ID to check, or the current user if omitted
+   * @return int[]
+   * @throws \core\exception\coding_exception
+   * @throws dml_exception
+   * @throws coding_exception
+   */
     public static function get_allowed_pages(?int $userid = null): array {
         global $USER, $DB;
 
@@ -116,13 +122,16 @@ class audience {
         cache::make('local_custompage', 'custompage_allowed_pages')->purge();
     }
 
-    /**
-     * Generate SQL select clause and params for selecting pages specified user can access, based on audience configuration
-     *
-     * @param string $pagetablealias
-     * @param int|null $userid User ID to check, or the current user if omitted
-     * @return array
-     */
+  /**
+   * Generate SQL select clause and params for selecting pages specified user can access, based on audience configuration
+   *
+   * @param string $pagetablealias
+   * @param int|null $userid User ID to check, or the current user if omitted
+   * @return array
+   * @throws \core\exception\coding_exception
+   * @throws coding_exception
+   * @throws dml_exception
+   */
     public static function user_pages_list_sql(string $pagetablealias, ?int $userid = null): array {
         global $DB;
 
@@ -140,12 +149,15 @@ class audience {
         return [$sql, $params];
     }
 
-    /**
-     * Return list of page ID's specified user can access, based on audience configuration
-     *
-     * @param int|null $userid User ID to check, or the current user if omitted
-     * @return int[]
-     */
+  /**
+   * Return list of page ID's specified user can access, based on audience configuration
+   *
+   * @param int|null $userid User ID to check, or the current user if omitted
+   * @return int[]
+   * @throws \core\exception\coding_exception
+   * @throws coding_exception
+   * @throws dml_exception
+   */
     public static function user_pages_list(?int $userid = null): array {
         global $DB;
         $pagetablealias = database::generate_alias();
@@ -157,21 +169,24 @@ class audience {
         return $DB->get_fieldset_sql($sql, $params);
     }
 
-    /**
-     * Returns SQL to limit the list of pages to those that the given user has access to
-     *
-     * - A user with 'editall' capability will have access to all pages
-     * - A user with 'edit' capability will have access to:
-     *      - Those pages this user has created
-     *      - Those pages this user is in audience of
-     * - A user with 'view' capability will have access to:
-     *      - Those pages this user is in audience of
-     *
-     * @param string $pagetablealias
-     * @param int|null $userid User ID to check, or the current user if omitted
-     * @param context|null $context
-     * @return array
-     */
+  /**
+   * Returns SQL to limit the list of pages to those that the given user has access to
+   *
+   * - A user with 'editall' capability will have access to all pages
+   * - A user with 'edit' capability will have access to:
+   *      - Those pages this user has created
+   *      - Those pages this user is in audience of
+   * - A user with 'view' capability will have access to:
+   *      - Those pages this user is in audience of
+   *
+   * @param string $pagetablealias
+   * @param int|null $userid User ID to check, or the current user if omitted
+   * @param context|null $context
+   * @return array
+   * @throws \core\exception\coding_exception
+   * @throws coding_exception
+   * @throws dml_exception
+   */
     public static function user_pages_list_access_sql(
         string $pagetablealias,
         ?int $userid = null,
@@ -204,13 +219,14 @@ class audience {
         return ['1=1', []];
     }
 
-    /**
-     * Return appropriate list of where clauses and params for given audiences
-     *
-     * @param audience_model[] $audiences
-     * @param string $usertablealias
-     * @return array[] [$wheres, $params]
-     */
+  /**
+   * Return appropriate list of where clauses and params for given audiences
+   *
+   * @param audience_model[] $audiences
+   * @param string $usertablealias
+   * @return array[] [$wheres, $params]
+   * @throws coding_exception
+   */
     public static function user_audience_sql(array $audiences, string $usertablealias = 'u'): array {
         $wheres = $params = [];
 
@@ -232,11 +248,12 @@ class audience {
         return [$wheres, $params];
     }
 
-    /**
-     * Returns the list of audiences types in the system.
-     *
-     * @return array
-     */
+  /**
+   * Returns the list of audiences types in the system.
+   *
+   * @return array
+   * @throws coding_exception
+   */
     private static function get_audience_types(): array {
         $sources = [];
 
@@ -259,13 +276,14 @@ class audience {
         return $sources;
     }
 
-    /**
-     * Get all the audiences types the current user can add to, organised by categories.
-     *
-     * @return array
-     *
-     * @deprecated since Moodle 4.1 - please do not use this function any more, {@see custom_page_audience_cards_exporter}
-     */
+  /**
+   * Get all the audiences types the current user can add to, organised by categories.
+   *
+   * @return array
+   *
+   * @throws coding_exception
+   * @deprecated since Moodle 4.1 - please do not use this function any more, {@see custom_page_audience_cards_exporter}
+   */
     public static function get_all_audiences_menu_types(): array {
         debugging('The function ' . __FUNCTION__ . '() is deprecated, please do not use it any more. ' .
             'See \'custom_page_audience_cards_exporter\' class for replacement', DEBUG_DEVELOPER);

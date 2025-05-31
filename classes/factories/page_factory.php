@@ -23,11 +23,14 @@
  */
 
 namespace local_custompage\factories;
-use local_custompage\local\models\page as page_persistent;
 use local_custompage\local\custompage\page;
+use local_custompage\local\models\page as page_persistent;
 
 /**
- * page factory
+ * page factory.
+ *
+ * This factory creates the page object, which is responsible for accessing the data
+ * from the database and performing the logic of the page.
  */
 class page_factory {
     /**

@@ -15,7 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- *  access.php description here.
+ * Defines capabilities for the local_custompage plugin.
+ * This file specifies access control permissions and capabilities for managing custom pages.
  *
  * @package     local_custompage
  * @copyright   2024 BitAscii Solutions <bitascii.dev@gmail.com>

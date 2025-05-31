@@ -18,11 +18,15 @@ declare(strict_types=1);
 
 namespace local_custompage\external\audiences;
 
-use local_custompage\local\audiences\base;
+use coding_exception;
+use core_external\restricted_context_exception;
 use external_api;
 use external_function_parameters;
 use external_value;
+use invalid_parameter_exception;
+use local_custompage\local\audiences\base;
 use local_custompage\manager;
+use local_custompage\page_access_exception;
 use local_custompage\permission;
 
 defined('MOODLE_INTERNAL') || die();
@@ -52,13 +56,17 @@ class delete extends external_api {
         );
     }
 
-    /**
-     * External function to delete a page audience instance.
-     *
-     * @param int $pageid
-     * @param int $instanceid
-     * @return bool
-     */
+  /**
+   * External function to delete a page audience instance.
+   *
+   * @param int $pageid
+   * @param int $instanceid
+   * @return bool
+   * @throws coding_exception
+   * @throws restricted_context_exception
+   * @throws invalid_parameter_exception
+   * @throws page_access_exception
+   */
     public static function execute(int $pageid, int $instanceid): bool {
         [
             'pageid' => $pageid,

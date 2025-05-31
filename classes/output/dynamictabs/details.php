@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 namespace local_custompage\output\dynamictabs;
 
+use coding_exception;
 use core\output\dynamic_tabs\base;
 use local_custompage\factories\page_factory;
 use local_custompage\local\models\page;
@@ -32,12 +33,13 @@ use renderer_base;
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class details extends base {
-    /**
-     * Export this for use in a mustache template context
-     *
-     * @param renderer_base $output
-     * @return array
-     */
+  /**
+   * Export this for use in a mustache template context
+   *
+   * @param renderer_base $output
+   * @return array
+   * @throws coding_exception
+   */
     public function export_for_template(renderer_base $output): array {
         $custompage = page_factory::create((int) $this->data['pageid']);
 
@@ -48,11 +50,12 @@ class details extends base {
         ];
     }
 
-    /**
-     * The label to be displayed on the tab
-     *
-     * @return string
-     */
+  /**
+   * The label to be displayed on the tab
+   *
+   * @return string
+   * @throws coding_exception
+   */
     public function get_tab_label(): string {
         return get_string('details');
     }

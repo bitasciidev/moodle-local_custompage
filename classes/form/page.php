@@ -18,14 +18,19 @@ declare(strict_types=1);
 
 namespace local_custompage\form;
 
+use coding_exception;
 use context;
 use context_system;
+use core\exception\moodle_exception;
+use core\invalid_persistent_exception;
 use core_form\dynamic_form;
+use dml_exception;
+use invalid_parameter_exception;
+use local_custompage\local\helpers\page as pagehelper;
 use local_custompage\local\models\page as page_model;
 use local_custompage\manager;
 use local_custompage\permission;
 use moodle_url;
-use local_custompage\local\helpers\page as pagehelper;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -40,11 +45,12 @@ require_once("$CFG->libdir/formslib.php");
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class page extends dynamic_form {
-    /**
-     * Return the context for the form, it should be that of the custom page itself, or system when creating a new page
-     *
-     * @return context
-     */
+  /**
+   * Return the context for the form, it should be that of the custom page itself, or system when creating a new page
+   *
+   * @return context
+   * @throws dml_exception
+   */
     public function get_context_for_dynamic_submission(): context {
         if ($page = $this->get_custom_page()) {
             return $page->get_context();
@@ -60,9 +66,7 @@ class page extends dynamic_form {
      */
     protected function get_custom_page(): ?page_model {
         if ($pageid = $this->optional_param('id', 0, PARAM_INT)) {
-            /** @var page_model $custompage */
-            $custompage = manager::get_page_from_id($pageid);
-            return $custompage;
+          return manager::get_page_from_id($pageid);
         }
         return null;
     }
@@ -99,11 +103,15 @@ class page extends dynamic_form {
         }
     }
 
-    /**
-     * Process the form submission
-     *
-     * @return string The URL to advance to upon completion
-     */
+  /**
+   * Process the form submission
+   *
+   * @return string The URL to advance to upon completion
+   * @throws coding_exception
+   * @throws invalid_persistent_exception
+   * @throws invalid_parameter_exception
+   * @throws moodle_exception
+   */
     public function process_dynamic_submission() {
         $data = $this->get_data();
 
@@ -136,13 +144,14 @@ class page extends dynamic_form {
         return new moodle_url('/local/custompage/index.php');
     }
 
-    /**
-     * Perform some extra moodle validation
-     *
-     * @param array $data
-     * @param array $files
-     * @return array
-     */
+  /**
+   * Perform some extra moodle validation
+   *
+   * @param array $data
+   * @param array $files
+   * @return array
+   * @throws coding_exception
+   */
     public function validation($data, $files): array {
         $errors = [];
 
