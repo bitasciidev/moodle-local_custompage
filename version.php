@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_custompage';
 $plugin->release = '5.0.0';
-$plugin->version = 20250900101;
+$plugin->version = 20250900105;
 $plugin->requires = 2024042200;
 $plugin->maturity = MATURITY_RC;
 $plugin->supported = [404, 500];

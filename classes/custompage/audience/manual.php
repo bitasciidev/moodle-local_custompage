@@ -66,7 +66,13 @@ class manual extends base {
     public function get_sql(string $usertablealias): array {
         global $DB;
 
-        $users = $this->get_configdata()['users'];
+        $users = $this->get_configdata()['users'] ?? [];
+
+        // Return empty result if no users are selected.
+        if (empty($users)) {
+            return ['', '1=0', []];
+        }
+
         $prefix = database::generate_param_name() . '_';
         [$insql, $inparams] = $DB->get_in_or_equal($users, SQL_PARAMS_NAMED, $prefix);
 

@@ -58,7 +58,13 @@ class systemrole extends base {
     public function get_sql(string $usertablealias): array {
         global $DB;
 
-        $roles = $this->get_configdata()['roles'];
+        $roles = $this->get_configdata()['roles'] ?? [];
+
+        // Return empty result if no roles are selected.
+        if (empty($roles)) {
+            return ['', '1=0', []];
+        }
+
         $prefix = database::generate_param_name() . '_';
         [$insql, $inparams] = $DB->get_in_or_equal($roles, SQL_PARAMS_NAMED, $prefix);
 

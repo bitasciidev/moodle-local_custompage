@@ -51,6 +51,7 @@ class cohort extends base {
 
         $mform->addElement('autocomplete', 'cohorts', get_string('cohorts', 'core_cohort'), $cohortoptions, ['multiple' => true]);
         $mform->addRule('cohorts', null, 'required', null, 'client');
+        $mform->addHelpButton('cohorts', 'cohorts', 'local_custompage');
     }
 
     /**
@@ -64,7 +65,13 @@ class cohort extends base {
     public function get_sql(string $usertablealias): array {
         global $DB;
 
-        $cohorts = $this->get_configdata()['cohorts'];
+        $cohorts = $this->get_configdata()['cohorts'] ?? [];
+
+        // Return empty result if no cohorts are selected.
+        if (empty($cohorts)) {
+            return ['', '1=0', []];
+        }
+
         $prefix = database::generate_param_name() . '_';
         [$insql, $inparams] = $DB->get_in_or_equal($cohorts, SQL_PARAMS_NAMED, $prefix);
 

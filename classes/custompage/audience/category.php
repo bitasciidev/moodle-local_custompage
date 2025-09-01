@@ -51,6 +51,7 @@ class category extends base {
 
         $mform->addElement('autocomplete', 'categories', get_string('categories', 'core'), $categoryoptions, ['multiple' => true]);
         $mform->addRule('categories', null, 'required', null, 'client');
+        $mform->addHelpButton('categories', 'categories', 'local_custompage');
     }
 
     /**
@@ -64,7 +65,13 @@ class category extends base {
     public function get_sql(string $usertablealias): array {
         global $DB;
 
-        $categories = $this->get_configdata()['categories'];
+        $categories = $this->get_configdata()['categories'] ?? [];
+
+        // Return empty result if no categories are selected.
+        if (empty($categories)) {
+            return ['', '1=0', []];
+        }
+
         $prefix = database::generate_param_name() . '_';
         [$insql, $inparams] = $DB->get_in_or_equal($categories, SQL_PARAMS_NAMED, $prefix);
 

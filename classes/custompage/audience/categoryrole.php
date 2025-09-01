@@ -19,9 +19,11 @@ declare(strict_types=1);
 namespace local_custompage\custompage\audience;
 
 use coding_exception;
+use context_coursecat;
 use context_system;
 use core_reportbuilder\local\helpers\database;
 use dml_exception;
+use Exception;
 use local_custompage\local\audiences\base;
 use MoodleQuickForm;
 
@@ -49,14 +51,43 @@ class categoryrole extends base {
             $categoryoptions[$category->id] = $category->name;
         }
 
-        // Get available roles.
-        $roles = get_assignable_roles(context_system::instance(), ROLENAME_ALIAS);
+        // Get available roles that can be assigned in category contexts.
+        // First, try to find a visible category to use as context.
+        $samplecategory = $DB->get_record('course_categories', ['visible' => 1], 'id', IGNORE_MULTIPLE);
+        
+        if ($samplecategory) {
+            try {
+                $categorycontext = context_coursecat::instance($samplecategory->id);
+                $roles = get_assignable_roles($categorycontext, ROLENAME_ALIAS);
+            } catch (Exception $e) {
+                // If context creation fails, fall back to archetype-based filtering.
+                $roles = [];
+            }
+        }
+        
+        // If we don't have roles yet, use fallback method.
+        if (empty($roles)) {
+            // Fallback: get roles that are typically assignable in category contexts.
+            $allroles = get_assignable_roles(context_system::instance(), ROLENAME_ALIAS);
+            $categoryroles = [];
+            foreach ($allroles as $roleid => $rolename) {
+                $role = $DB->get_record('role', ['id' => $roleid]);
+                if ($role) {
+                    // Include roles that are commonly used in category contexts.
+                    $categoryarchetypes = ['manager', 'editingteacher', 'teacher', 'student'];
+                    if (in_array($role->archetype, $categoryarchetypes)) {
+                        $categoryroles[$roleid] = $rolename;
+                    }
+                }
+            }
+            $roles = $categoryroles;
+        }
 
         $mform->addElement('autocomplete', 'categories', get_string('categories', 'core'), $categoryoptions, ['multiple' => true]);
-        $mform->addRule('categories', null, 'required', null, 'client');
+        $mform->addHelpButton('categories', 'categoryrole_categories', 'local_custompage');
 
         $mform->addElement('autocomplete', 'roles', get_string('selectrole', 'role'), $roles, ['multiple' => true]);
-        $mform->addRule('roles', null, 'required', null, 'client');
+        $mform->addHelpButton('roles', 'categoryrole_roles', 'local_custompage');
     }
 
     /**
@@ -70,14 +101,13 @@ class categoryrole extends base {
     public function get_sql(string $usertablealias): array {
         global $DB;
 
-        $categories = $this->get_configdata()['categories'];
-        $roles = $this->get_configdata()['roles'];
+        $categories = $this->get_configdata()['categories'] ?? [];
+        $roles = $this->get_configdata()['roles'] ?? [];
 
-        $categoryprefix = database::generate_param_name() . '_';
-        [$categoryinsql, $categoryparams] = $DB->get_in_or_equal($categories, SQL_PARAMS_NAMED, $categoryprefix);
-
-        $roleprefix = database::generate_param_name() . '_';
-        [$roleinsql, $roleparams] = $DB->get_in_or_equal($roles, SQL_PARAMS_NAMED, $roleprefix);
+        // Return empty result if neither categories nor roles are selected.
+        if (empty($categories) && empty($roles)) {
+            return ['', '1=0', []];
+        }
 
         // Ensure parameter names and aliases are unique.
         $roleassignments = database::generate_alias();
@@ -87,11 +117,32 @@ class categoryrole extends base {
             JOIN {role_assignments} {$roleassignments} ON {$roleassignments}.userid = {$usertablealias}.id
             JOIN {context} {$context} ON {$context}.id = {$roleassignments}.contextid";
 
-        $where = "{$context}.contextlevel = " . CONTEXT_COURSECAT . " 
-                  AND {$context}.instanceid {$categoryinsql} 
-                  AND {$roleassignments}.roleid {$roleinsql}";
+        $where = "{$context}.contextlevel = " . CONTEXT_COURSECAT;
+        $params = [];
 
-        return [$join, $where, $categoryparams + $roleparams];
+        // Build conditions for categories and roles.
+        $conditions = [];
+
+        if (!empty($categories)) {
+            $categoryprefix = database::generate_param_name() . '_';
+            [$categoryinsql, $categoryparams] = $DB->get_in_or_equal($categories, SQL_PARAMS_NAMED, $categoryprefix);
+            $conditions[] = "{$context}.instanceid {$categoryinsql}";
+            $params = $params + $categoryparams;
+        }
+
+        if (!empty($roles)) {
+            $roleprefix = database::generate_param_name() . '_';
+            [$roleinsql, $roleparams] = $DB->get_in_or_equal($roles, SQL_PARAMS_NAMED, $roleprefix);
+            $conditions[] = "{$roleassignments}.roleid {$roleinsql}";
+            $params = $params + $roleparams;
+        }
+
+        // Combine conditions with AND logic.
+        if (!empty($conditions)) {
+            $where .= " AND (" . implode(' AND ', $conditions) . ")";
+        }
+
+        return [$join, $where, $params];
     }
 
     /**
@@ -114,8 +165,8 @@ class categoryrole extends base {
     public function get_description(): string {
         global $DB;
 
-        $categoryids = $this->get_configdata()['categories'];
-        $roleids = $this->get_configdata()['roles'];
+        $categoryids = $this->get_configdata()['categories'] ?? [];
+        $roleids = $this->get_configdata()['roles'] ?? [];
 
         $descriptions = [];
 
@@ -126,6 +177,8 @@ class categoryrole extends base {
                 $categorynames[] = $category->name;
             }
             $descriptions[] = get_string('categories', 'core') . ': ' . implode(', ', $categorynames);
+        } else {
+            $descriptions[] = get_string('categories', 'core') . ': ' . get_string('all', 'core');
         }
 
         if (!empty($roleids)) {
@@ -135,9 +188,11 @@ class categoryrole extends base {
                 $rolenames[] = $role->name;
             }
             $descriptions[] = get_string('roles', 'core') . ': ' . implode(', ', $rolenames);
+        } else {
+            $descriptions[] = get_string('roles', 'core') . ': ' . get_string('all', 'core');
         }
 
-        return implode('; ', $descriptions);
+        return implode(' AND ', $descriptions);
     }
 
     /**
@@ -172,8 +227,36 @@ class categoryrole extends base {
     public function is_available(): bool {
         global $DB;
         
-        // Only available if there are visible categories and assignable roles.
-        return $DB->record_exists('course_categories', ['visible' => 1]) && 
-               !empty(get_assignable_roles(context_system::instance()));
+        // Only available if there are visible categories and category-specific roles.
+        if (!$DB->record_exists('course_categories', ['visible' => 1])) {
+            return false;
+        }
+        
+        // Check if there are any roles that can be assigned in category contexts.
+        $samplecategory = $DB->get_record('course_categories', ['visible' => 1], 'id', IGNORE_MULTIPLE);
+        
+        if ($samplecategory) {
+            try {
+                $categorycontext = context_coursecat::instance($samplecategory->id);
+                $roles = get_assignable_roles($categorycontext, ROLENAME_ALIAS);
+                return !empty($roles);
+            } catch (Exception $e) {
+                // If context creation fails, fall back to archetype-based checking.
+            }
+        }
+        
+        // Fallback: check if there are any roles that are typically assignable in category contexts.
+        $allroles = get_assignable_roles(context_system::instance(), ROLENAME_ALIAS);
+        $categoryroles = [];
+        foreach ($allroles as $roleid => $rolename) {
+            $role = $DB->get_record('role', ['id' => $roleid]);
+            if ($role) {
+                $categoryarchetypes = ['manager', 'editingteacher', 'teacher', 'student'];
+                if (in_array($role->archetype, $categoryarchetypes)) {
+                    $categoryroles[$roleid] = $rolename;
+                }
+            }
+        }
+        return !empty($categoryroles);
     }
 }
