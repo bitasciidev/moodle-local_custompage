@@ -1,0 +1,35 @@
+{{#nocontents}}
+  <div class="container">
+    <div class="alert alert-primary" role="alert">
+      {{#str}}noblocks, local_custompage{{/str}}
+    </div>
+  </div>
+{{/nocontents}}
+
+{{#content}}
+  <div class="container page-region-content">
+    <h5>
+      <span>{{#pix}} i/addblock, core {{/pix}}</span>
+      <span>{{regionname}}</span>
+    </h5>
+    {{#regioncontents}}
+      <div class="alert alert-secondary" role="alert">
+        {{name}}
+      </div>
+    {{/regioncontents}}
+  </div>
+{{/content}}
+
+{{#side-pre}}
+  <div class="container page-right-content">
+    <h5>
+      <span>{{#pix}} i/addblock, core {{/pix}}</span>
+      <span>{{regionname}}</span>
+    </h5>
+    {{#regioncontents}}
+      <div class="alert alert-secondary" role="alert">
+        {{name}}
+      </div>
+    {{/regioncontents}}
+  </div>
+{{/side-pre}}

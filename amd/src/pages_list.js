@@ -1,0 +1,174 @@
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Page builder pages list management
+ *
+ * @module      local_custompage/pages_list
+ * @copyright   2021 David Matamoros <davidmc@moodle.com>
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+"use strict";
+
+import {dispatchEvent} from 'core/event_dispatcher';
+import Notification from 'core/notification';
+import Pending from 'core/pending';
+import {prefetchStrings} from 'core/prefetch';
+import {get_string as getString} from 'core/str';
+import {add as addToast} from 'core/toast';
+import * as reportEvents from 'core_reportbuilder/local/events';
+import * as pageSelectors from 'local_custompage/local/selectors';
+import {deletePage, movePageUp, movePageDown} from 'local_custompage/local/repository/pages';
+import {createPageModal} from 'local_custompage/local/repository/modals';
+
+/**
+ * Initialise module
+ */
+export const init = () => {
+    prefetchStrings('local_custompage', [
+        'deletepage',
+        'deletepageconfirm',
+        'editpagedetails',
+        'newpage',
+        'pagedeleted',
+        'pageupdated',
+        'moveup',
+        'movedown',
+        'sortorderupdated',
+        'errorsortingpages',
+    ]);
+
+    prefetchStrings('core', [
+        'delete',
+    ]);
+
+    document.addEventListener('click', event => {
+        const pageCreate = event.target.closest(pageSelectors.actions.pageCreate);
+        if (pageCreate) {
+            event.preventDefault();
+
+            // Redirect user to editing interface for the page after submission.
+            const pageModal = createPageModal(event.target, getString('newpage', 'local_custompage'));
+            pageModal.addEventListener(pageModal.events.FORM_SUBMITTED, event => {
+                window.location.href = event.detail;
+            });
+
+            pageModal.show();
+        }
+
+        const pageEdit = event.target.closest(pageSelectors.actions.pageEdit);
+        if (pageEdit) {
+            event.preventDefault();
+
+            // Reload current report page after submission.
+            // Use triggerElement to return focus to the action menu toggle.
+            const triggerElement = pageEdit.closest('.dropdown').querySelector('.dropdown-toggle');
+            const pageModal = createPageModal(triggerElement, getString('editpagedetails', 'local_custompage'),
+                pageEdit.dataset.pageId);
+            pageModal.addEventListener(pageModal.events.FORM_SUBMITTED, () => {
+
+                let tableElement = window.document.querySelector('div.reportbuilder-report');
+
+                getString('pageupdated', 'local_custompage')
+                    .then(addToast)
+                    // eslint-disable-next-line promise/always-return
+                    .then(() => {
+                        dispatchEvent(reportEvents.tableReload, {preservePagination: true}, tableElement);
+                    })
+                    .catch(Notification.exception);
+            });
+
+            pageModal.show();
+        }
+
+        const pageDelete = event.target.closest(pageSelectors.actions.pageDelete);
+        if (pageDelete) {
+            event.preventDefault();
+
+            // Use triggerElement to return focus to the action menu toggle.
+            const triggerElement = pageDelete.closest('.dropdown').querySelector('.dropdown-toggle');
+            Notification.saveCancelPromise(
+                getString('deletepage', 'local_custompage'),
+                getString('deletepageconfirm', 'local_custompage', pageDelete.dataset.pageName),
+                getString('delete', 'core'),
+                {triggerElement}
+            ).then(() => {
+                const pendingPromise = new Pending('local_custompage/pages:delete');
+                let tableElement = window.document.querySelector('div.reportbuilder-report');
+
+                // eslint-disable-next-line promise/no-nesting
+                return deletePage(pageDelete.dataset.pageId)
+                    .then(() => addToast(getString('pagedeleted', 'local_custompage')))
+                    .then(() => {
+                        dispatchEvent(reportEvents.tableReload, {preservePagination: true}, tableElement);
+                        return pendingPromise.resolve();
+                    })
+                    .catch(Notification.exception);
+            }).catch(Notification.exception);
+        }
+
+        const pageMoveUp = event.target.closest('[data-action="page-move-up"]');
+        if (pageMoveUp) {
+            event.preventDefault();
+            handlePageMove(pageMoveUp.dataset.pageId, 'up');
+        }
+
+        const pageMoveDown = event.target.closest('[data-action="page-move-down"]');
+        if (pageMoveDown) {
+            event.preventDefault();
+            handlePageMove(pageMoveDown.dataset.pageId, 'down');
+        }
+    });
+
+    /**
+     * Handle page move up/down operations
+     *
+     * @param {string} pageId The page ID to move
+     * @param {string} direction Either 'up' or 'down'
+     */
+    const handlePageMove = (pageId, direction) => {
+        const pendingPromise = new Pending(`local_custompage/pages:move-${direction}`);
+        const tableElement = window.document.querySelector('div.reportbuilder-report');
+
+        const moveFunction = direction === 'up' ? movePageUp : movePageDown;
+        const successMessage = direction === 'up' ? 'sortorderupdated' : 'sortorderupdated';
+
+        moveFunction(parseInt(pageId))
+            .then((result) => {
+                if (result.success) {
+                    return getString(successMessage, 'local_custompage');
+                } else {
+                    throw new Error(result.message);
+                }
+            })
+            .then(addToast)
+            .then(() => {
+                dispatchEvent(reportEvents.tableReload, {preservePagination: true}, tableElement);
+                return pendingPromise.resolve();
+            })
+            .catch((error) => {
+                getString('errorsortingpages', 'local_custompage')
+                    .then((errorMsg) => {
+                        Notification.addNotification({
+                            type: 'error',
+                            message: errorMsg + ': ' + error.message
+                        });
+                    })
+                    .catch(Notification.exception);
+                pendingPromise.resolve();
+            });
+    };
+};
