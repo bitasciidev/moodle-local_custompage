@@ -168,6 +168,7 @@ $string['showinprimarynav_desc'] = 'If selected, this page will appear in the pr
 $string['showinprimarynav_help'] = 'If selected, this page and its children will appear in the primary navigation. If not selected, the page can only be accessed via direct URL.';
 
 // Sorting functionality.
+$string['sortorder'] = 'Sort order';
 $string['sortorderupdated'] = 'Page sort order updated successfully';
 $string['errorsortingpages'] = 'Error updating page sort order';
 $string['invalidparent'] = 'Invalid parent page specified';

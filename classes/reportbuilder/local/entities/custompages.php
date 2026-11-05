@@ -110,8 +110,7 @@ class custompages extends base {
         ))
         ->add_joins($this->get_joins())
         ->set_type(column::TYPE_TEXT)
-        ->add_fields("{$tablealias}.sortthread,
-                {$tablealias}.depth,
+        ->add_fields("{$tablealias}.depth,
                 {$tablealias}.path,
                 {$tablealias}.parent,
                 {$tablealias}.name,
@@ -122,7 +121,7 @@ class custompages extends base {
         // Sort thread column for ordering.
         $columns[] = (new column(
             'sortthread',
-            new lang_string('sortorder', 'core'),
+            new lang_string('sortorder', 'local_custompage'),
             $this->get_entity_name()
         ))
         ->add_joins($this->get_joins())
