@@ -1,9 +1,18 @@
 # Changelog
 
+## [1.0.2] - 2026-06-23
+
+### Added
+- Primary navigation now appears for users via a new `before_http_headers` hook callback that injects custom page links into `$CFG->custommenuitems`
+- Defensive upgrade step that re-applies the `depth`, `path`, `sortthread`, `iscontainer` and `showinprimarynav` schema fields for sites that skipped intermediate upgrades
+
+### Fixed
+- Removed duplicate `sortthread` field selection in the Report Builder `custompages` entity
+- Fixed `sortorder` Report Builder column using the wrong `lang_string` component (`core` instead of `local_custompage`)
+
 ## [1.0.1] - 2026-05-01
 
 ### Fixed
-- Primary navigation now appears on admin/edit pages via `before_http_headers` hook
 - Fixed `CONTEXT_CUSTOMPAGE` undefined constant error in namespaced context class
 - Fixed `$PAGE->context` ordering in `view.php` to prevent filter warnings
 - Fixed missing hook registrations in `db/hooks.php`
