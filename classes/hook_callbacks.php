@@ -14,9 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+declare(strict_types=1);
+
 namespace local_custompage;
 
 use core\hook\after_config;
+use core\hook\output\before_http_headers;
 use core\hook\output\before_standard_top_of_body_html_generation;
 
 /**
@@ -46,6 +49,54 @@ class hook_callbacks {
         if (isset($CFG->dbunmodifiedcustommenuitems)) {
             $CFG->custommenuitems = $CFG->dbunmodifiedcustommenuitems;
             unset($CFG->dbunmodifiedcustommenuitems);
+        }
+    }
+
+    /**
+     * Inject custom page navigation items before HTTP headers are sent.
+     *
+     * Saves the original $CFG->custommenuitems, then appends custom page
+     * links for the current user. The before_standard_top_of_body_html_generation
+     * hook (above) restores the original value after the nav is rendered.
+     *
+     * @param before_http_headers $hook
+     */
+    public static function before_http_headers_generation(before_http_headers $hook): void {
+        global $CFG, $USER;
+
+        // Skip in AJAX and CLI contexts — no navigation needed.
+        if ((defined('AJAX_SCRIPT') && AJAX_SCRIPT) || (defined('CLI_SCRIPT') && CLI_SCRIPT)) {
+            return;
+        }
+
+        // Guard against double-injection (local_custompage_extend_navigation may also run).
+        if (isset($CFG->dbunmodifiedcustommenuitems)) {
+            return;
+        }
+
+        // Preserve the original custom menu items so the restoration hook can reset them.
+        $CFG->dbunmodifiedcustommenuitems = $CFG->custommenuitems ?? '';
+
+        try {
+            // Resolve the active user ID (including guest).
+            if (isloggedin()) {
+                $userid = (int)$USER->id;
+            } else if (!empty($CFG->guestloginbutton)) {
+                $guest = guest_user();
+                $userid = (int)$guest->id;
+            } else {
+                return;
+            }
+
+            $pages = \local_custompage\local\helpers\audience::user_pages_list($userid);
+            if (empty($pages)) {
+                return;
+            }
+
+            $hierarchy = \local_custompage\local\services\navigation::build_page_hierarchy($pages);
+            \local_custompage\local\services\navigation::add_bootstrap_hierarchical_menu_items($hierarchy);
+        } catch (\Exception $e) {
+            debugging('local_custompage: error injecting navigation items: ' . $e->getMessage(), DEBUG_DEVELOPER);
         }
     }
 
